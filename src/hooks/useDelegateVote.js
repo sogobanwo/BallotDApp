@@ -20,6 +20,7 @@ const useDelegateVote = (address) => {
         const signer = await readWriteProvider.getSigner();
 
         const contract = getProposalsContract(signer);
+				const loadingToast= toast.loading('Delegating vote...');
 
         try {
             const estimatedGas = await contract.delegate.estimateGas(
@@ -44,14 +45,16 @@ const useDelegateVote = (address) => {
             console.log("receipt: ", receipt);
 
             if (receipt.status) {
-                console.log("delegate successfull!");
+								toast.remove(loadingToast)
+                console.log("Vote Delegation successful!");
 								return toast.success("Vote delegation successful")
             }
 
             console.log("delegate failed!");
 						return toast.error("Vote delegation failed")
         } catch (error) {
-           toast.error("error: ", error.reason);
+					 toast.remove(loadingToast)
+           toast.error(error.reason);
         }
     }, [address, chainId, walletProvider]);
 };

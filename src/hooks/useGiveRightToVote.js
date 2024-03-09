@@ -7,6 +7,7 @@ import {
     useWeb3ModalAccount,
     useWeb3ModalProvider,
 } from "@web3modal/ethers/react";
+import toast from "react-hot-toast";
 
 const useGiveRightToVote = (address) => {
     const { chainId } = useWeb3ModalAccount();
@@ -19,6 +20,7 @@ const useGiveRightToVote = (address) => {
         const signer = await readWriteProvider.getSigner();
 
         const contract = getProposalsContract(signer);
+        const loadingToast= toast.loading('Giving vote right...');
 
         try {
             const estimatedGas = await contract.giveRightToVote.estimateGas(
@@ -43,12 +45,17 @@ const useGiveRightToVote = (address) => {
             console.log("receipt: ", receipt);
 
             if (receipt.status) {
-                return console.log("giveRightToVote successfull!");
+                toast.remove(loadingToast)
+
+                console.log("giveRightToVote successfull!");
+
+                return toast.success("Voting right successfully given")
             }
 
-            console.log("giveRightToVote failed!");
+            console.log("Failed to give voting right");
         } catch (error) {
-            console.error("error: ", error);
+            toast.remove(loadingToast)
+            return toast.error(error.reason);
         }
     }, [address, chainId, walletProvider]);
 };

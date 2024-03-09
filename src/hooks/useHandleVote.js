@@ -3,6 +3,7 @@ import { isSupportedChain } from '../utils';
 import { getProvider } from '../constants/providers';
 import { getProposalsContract } from '../constants/contracts';
 import { useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
+import toast from 'react-hot-toast';
 
 const useHandleVote = (id) => {
 	const { chainId } = useWeb3ModalAccount();
@@ -14,6 +15,7 @@ const useHandleVote = (id) => {
         const signer = await readWriteProvider.getSigner();
 
         const contract = getProposalsContract(signer);
+        const loadingToast= toast.loading('Voting...');
 
         try {
             const transaction = await contract.vote(id);
@@ -28,6 +30,7 @@ const useHandleVote = (id) => {
 
             console.log("vote failed!");
         } catch (error) {
+            toast.remove(loadingToast)
             console.log(error);
             let errorText;
             if (error.reason === "Has no right to vote") {
@@ -37,8 +40,7 @@ const useHandleVote = (id) => {
             } else {
                 errorText = "An unknown error occured";
             }
-
-            console.error("error: ", errorText);
+            toast.error(errorText);
         }
     }, [chainId, walletProvider]);
 }
